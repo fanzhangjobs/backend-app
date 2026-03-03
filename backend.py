@@ -9,7 +9,7 @@ def status():
 @app.route("/compute", methods=["POST"])
 def compute():
     data = request.json
-    result = data.get("value", 0) * 2
+    result = data.get("value", 0) * 3 
     return jsonify({"result": result})
 
 if __name__ == "__main__":
