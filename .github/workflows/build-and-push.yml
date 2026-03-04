@@ -54,8 +54,14 @@ jobs:
         run: |
           docker tag ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:${NEXT_TAG} ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:latest
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:latest
-
-      - name: Create Git tag (optional)
+      - name: Create Git tag
+        env:
+          NEXT_TAG: ${{ env.NEXT_TAG }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
           git tag $NEXT_TAG
-          git push origin $NEXT_TAG
+          # Push using token to authenticate
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} $NEXT_TAG
