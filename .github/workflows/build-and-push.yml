@@ -9,9 +9,25 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up Git
+        run: git fetch --tags
+
+      - name: Determine next version
+        id: version
+        run: |
+          # Get latest tag or default to v0.0.0
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          echo "Last tag: $LAST_TAG"
+
+          # Extract major, minor, patch
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${LAST_TAG#v}"
+          PATCH=$((PATCH+1))
+          NEXT_TAG="v$MAJOR.$MINOR.$PATCH"
+          echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_ENV
+          echo "Next version: $NEXT_TAG"
 
       - uses: azure/login@v1
         with:
@@ -25,17 +41,21 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:${GITHUB_SHA} .
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:${NEXT_TAG} .
 
       - name: Login to ACR
-        run: |
-          az acr login --name ${{ secrets.ACR_NAME }}
+        run: az acr login --name ${{ secrets.ACR_NAME }}
 
-      - name: Push image
+      - name: Push Docker image
         run: |
-          docker push ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:${GITHUB_SHA}
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:${NEXT_TAG}
 
       - name: Tag latest
         run: |
-          docker tag ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:${GITHUB_SHA} ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:latest
+          docker tag ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:${NEXT_TAG} ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:latest
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/backendapp:latest
+
+      - name: Create Git tag (optional)
+        run: |
+          git tag $NEXT_TAG
+          git push origin $NEXT_TAG
