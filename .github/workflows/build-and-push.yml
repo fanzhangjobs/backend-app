@@ -29,6 +29,25 @@ jobs:
           echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_ENV
           echo "Next version: $NEXT_TAG"
 
+      - name: Determine next version
+        id: version
+        run: |
+          # Use manual tag if provided
+          if [ -n "${{ secrets.MANUAL_TAG }}" ]; then
+          NEXT_TAG="${{ secrets.MANUAL_TAG }}"
+          echo "Using manual tag: $NEXT_TAG"
+          else
+            # Auto-increment patch
+            LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+            echo "Last tag: $LAST_TAG"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "${LAST_TAG#v}"
+            PATCH=$((PATCH+1))
+            NEXT_TAG="v$MAJOR.$MINOR.$PATCH"
+            echo "Auto-incremented tag: $NEXT_TAG"
+        fi
+
+    # Export to later steps
+    echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_ENV      
       - uses: azure/login@v1
         with:
           creds: |
