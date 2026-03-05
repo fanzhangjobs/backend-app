@@ -44,7 +44,7 @@ jobs:
             PATCH=$((PATCH+1))
             NEXT_TAG="v$MAJOR.$MINOR.$PATCH"
             echo "Auto-incremented tag: $NEXT_TAG"
-        fi
+          fi
 
     # Export to later steps
     echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_ENV      
