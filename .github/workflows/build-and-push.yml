@@ -46,8 +46,9 @@ jobs:
             echo "Auto-incremented tag: $NEXT_TAG"
           fi
 
-    # Export to later steps
-    echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_ENV      
+        # Export to later steps
+        echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_ENV
+
       - uses: azure/login@v1
         with:
           creds: |
