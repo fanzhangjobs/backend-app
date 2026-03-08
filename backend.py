@@ -9,7 +9,7 @@ def status():
 @app.route("/compute", methods=["POST"])
 def compute():
     data = request.json
-    result = data.get("value", 0) * 1000 
+    result = data.get("value", 0) * 100 
     return jsonify({"result": result})
 
 import time
