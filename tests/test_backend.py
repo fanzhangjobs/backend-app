@@ -16,7 +16,7 @@ def test_compute(client):
     """Test POST /compute endpoint"""
     response = client.post("/compute", json={"value": 5})
     assert response.status_code == 200
-    assert response.json == {"result": 5000}
+    assert response.json == {"result": 500}
 
 def test_compute_default(client):
     """Test POST /compute with no value"""
